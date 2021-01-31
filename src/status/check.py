@@ -6,11 +6,10 @@ import json
 import logging
 import re
 
-from aiokafka import AIOKafkaConsumer
+from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 import httpx
 
 from src import config
-from src import db
 from src.models import Website, WebsiteStatus
 
 logger = logging.getLogger(__name__)
@@ -61,32 +60,33 @@ async def check_website_status(website: Website) -> WebsiteStatus:
 
 
 async def check_websites(run_forever: bool = True):
-    """Listen to the event stream for any website check events."""
-    # Initialize the database. Sadly, async context manager is not supported.
-    conn = await db.get_conn()
-    try:
-        await db.init_db(conn)
-        # Setup the Kafka consumer.
-        consumer = AIOKafkaConsumer(
-            config.CHECK_WEBSITES_TOPIC,
-            bootstrap_servers=config.KAFKA_URI,
-            security_protocol='SSL',
-            ssl_context=config.get_kafka_security_context(),
-            group_id='check_websites_group'
-        )
-        async with consumer:
-            while True:
-                async for event in consumer:
-                    # Get the website status.
-                    website = Website(**json.loads(event.value.decode()))
-                    website_status = await check_website_status(website)
-                    # Write the status to the database.
-                    await db.insert_website_status(conn, website_status)
-                    logger.info(f'Saved status for website {website}')
-                if not run_forever:
-                    break
-    finally:
-        await conn.close()
+    """Listen to the event stream for any website check events.
+
+    :param run_forever: Set the `False` to exit after all the events were processed.
+    """
+    # Setup the Kafka consumer.
+    consumer = AIOKafkaConsumer(
+        config.CHECK_WEBSITES_TOPIC,
+        bootstrap_servers=config.KAFKA_URI,
+        security_protocol='SSL',
+        ssl_context=config.get_kafka_security_context(),
+        group_id='check_websites_group'
+    )
+    producer = AIOKafkaProducer(
+        bootstrap_servers=config.KAFKA_URI,
+        security_protocol='SSL',
+        ssl_context=config.get_kafka_security_context()
+    )
+    async with consumer, producer:
+        while True:
+            async for event in consumer:
+                # Get the website status.
+                website = Website(**json.loads(event.value.decode()))
+                website_status = await check_website_status(website)
+                # Write the status to the write status event stream.
+                await producer.send(config.WRITE_WEBSITE_STATUS_TOPIC, website_status.json().encode())
+            if not run_forever:
+                break
 
 
 if __name__ == '__main__':

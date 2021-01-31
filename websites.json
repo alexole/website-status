@@ -1,6 +1,6 @@
 [
   {
-    "url": "https://www.google.com/sdf?q=python",
+    "url": "https://www.google.com?q=python",
     "title": "Google",
     "regex": "Python"
   },

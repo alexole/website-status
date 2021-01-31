@@ -2,4 +2,4 @@
 
 export $(grep -v '^#' .env | xargs)
 
-python ./src/collect/status.py
+python ./src/status/check.py

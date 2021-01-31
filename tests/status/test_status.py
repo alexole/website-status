@@ -1,22 +1,17 @@
-"""Tests for the website status check logic."""
+"""Tests for the website status checking logic."""
 
-from typing import NamedTuple
 from unittest.mock import patch, AsyncMock
 
 import httpx
 import pytest
 
-from src.collect.status import UNKNOWN_STATUS_CODE, UNKNOWN_RESPONSE_TIME, check_website_status, check_websites
+from src.status.check import UNKNOWN_STATUS_CODE, UNKNOWN_RESPONSE_TIME, check_website_status, check_websites
 from src.models import Website
+
+from tests.status.common import KafkaEvent
 
 # Mark all tests as coroutines.
 pytestmark = pytest.mark.asyncio
-
-
-class KafkaEvent(NamedTuple):
-    """A fake Kafka event."""
-
-    value: bytes
 
 
 async def test_check_website_status(httpx_mock, website):
@@ -78,21 +73,21 @@ async def test_check_website_status_timeout_error(exception_cls, error_msg, http
     assert website_status.error_msg == error_msg
 
 
-@patch('src.db.get_conn', AsyncMock())
-@patch('src.db.insert_website_status')
-@patch('src.collect.status.AIOKafkaConsumer')
-@patch('src.collect.status.check_website_status')
-async def test_check_websites(mock_check_website_status, mock_kafka_consumer, mock_insert_website_status, website,
+@patch('src.status.check.AIOKafkaProducer')
+@patch('src.status.check.AIOKafkaConsumer')
+@patch('src.status.check.check_website_status')
+async def test_check_websites(mock_check_website_status, mock_kafka_consumer, mock_kafka_producer, website,
                               website_status):
     """Test the processing of website check events."""
-    website_data_bytes = website.json().encode()
     mock_check_website_status.return_value = website_status
+    website_data_bytes = website.json().encode()
     mock_kafka_consumer.return_value.__aiter__.return_value = [
         KafkaEvent(value=website_data_bytes),
         KafkaEvent(value=website_data_bytes)
     ]
+    mock_kafka_producer.return_value = AsyncMock()
 
     await check_websites(run_forever=False)
 
     assert mock_check_website_status.await_count == 2
-    assert mock_insert_website_status.await_count == 2
+    assert mock_kafka_producer.return_value.send.await_count == 2

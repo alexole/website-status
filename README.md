@@ -30,14 +30,20 @@ A toy website status checker testing the current state if async Kafka and Postgr
    
    This requires a Kafka and Postgres service running somewhere.
    [Aiven](https://console.aiven.io) is a great choice for this!
+   
+   **Important**: when setting up Kafka, make sure to create these topics:
+   * check_websites
+   * write_website_status
 
 5. Make sure `websites.json` contains the websites you want to check.
 
-6. Start the website status check collection and trigger process:
+6. Start the website status check collection, write and trigger as separate process:
    ```bash
-   ./bin/run_collect.sh
+   ./bin/run_check.sh
    ```
-
+   ```bash
+   ./bin/run_write.sh
+   ```
    ```bash
    ./bin/run_trigger.sh
    ```
