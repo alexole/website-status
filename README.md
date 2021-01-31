@@ -33,13 +33,12 @@ A toy website status checker testing the current state if async Kafka and Postgr
 
 5. Make sure `websites.json` contains the websites you want to check.
 
-6. Start the website status check collection process:
+6. Start the website status check collection and trigger process:
    ```bash
    ./bin/run_collect.sh
    ```
 
-7. Start the website status check trigger process:
-      ```bash
+   ```bash
    ./bin/run_trigger.sh
    ```
 
@@ -67,28 +66,6 @@ inv check
     inv test --no-coverage
     ```
 
-## Deploy on Heroku
-
-1. Install Heroku CLI
-```bash
-curl https://cli-assets.heroku.com/install.sh | sh
-```
-2. Login to Heroku
-```bash
-heroku login
-heroku container:login
-```
-
-3. Create the Heroku app and database
-```bash
-heroku create website-status
-```
-
-4. Push & release the image to Heroku
-```bash
-heroku container:push worker --recursive --app website-status
-heroku container:release woker --app website-status
-```
 
 ## Tech stack
 
