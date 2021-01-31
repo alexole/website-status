@@ -62,10 +62,9 @@ def test(ctx, no_coverage=False, html_report=False, no_colors=False):
 
     with ctx.cd(os.path.dirname(__file__)):
         if no_coverage:
-            ctx.run('env $(cat env_file | xargs) pytest --doctest-modules src tests', pty=not no_colors)
+            ctx.run('pytest --doctest-modules src tests', pty=not no_colors)
         else:
-            ctx.run('env $(cat env_file | xargs) coverage run --source=src -m pytest --quiet '
-                    '--doctest-modules src tests', pty=not no_colors)
+            ctx.run('coverage run --source=src -m pytest --quiet --doctest-modules src tests', pty=not no_colors)
             ctx.run('coverage report -m', pty=not no_colors)
             if html_report:
                 ctx.run('coverage html', pty=not no_colors)
