@@ -1,0 +1,6 @@
+httpx[http2]
+aiokafka
+asyncpg
+pydantic
+invoke
+pip-tools

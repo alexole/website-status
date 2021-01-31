@@ -1,0 +1,19 @@
+[
+  {
+    "url": "https://www.google.com/sdf?q=python",
+    "title": "Google",
+    "regex": "Python"
+  },
+  {
+    "url": "https://www.github.com",
+    "title": "GitHub"
+  },
+  {
+    "url": "https://www.heroku.com",
+    "title": "Heroku"
+  },
+  {
+    "url": "https://www.google.com/sdf",
+    "title": "Invalid Website"
+  }
+]
