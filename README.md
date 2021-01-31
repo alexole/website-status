@@ -93,5 +93,5 @@ heroku container:release woker --app website-status
 ## Tech stack
 
 It's a very simple website availability checker using async integrations with:
-* `Kafka`
-* `Postgres`
+* `Kafka` (aiokafka)
+* `Postgres` (asyncpg)
