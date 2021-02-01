@@ -1,4 +1,4 @@
-"""Data model shared between the """
+"""Shared data models."""
 
 from datetime import datetime
 
