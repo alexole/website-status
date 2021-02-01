@@ -1,5 +1,5 @@
 ## Intro
-A toy website status checker testing the current state of async Kafka and Postgres integration.
+A toy website status checker testing the current state of async Kafka and Postgres integrations.
 
 
 ## How to run
